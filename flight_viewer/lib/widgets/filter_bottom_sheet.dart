@@ -63,7 +63,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             children: [
               Text('Filter Flights', style: Theme.of(context).textTheme.titleLarge),
               IconButton(
-                icon: const Icon(Icons.clear),
+                icon: const Icon(Icons.close),
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -85,8 +85,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Maximum Price: \$${_price.toStringAsFixed(0)}', style: Theme.of(context).textTheme.bodyLarge),
+        Text('Maximum Price', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('\$${widget.minPrice.toStringAsFixed(0)}', style: Theme.of(context).textTheme.bodySmall),
+            Text('\$${_price.toStringAsFixed(0)}', style: Theme.of(context).textTheme.titleMedium),
+            Text('\$${widget.maxPrice.toStringAsFixed(0)}', style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
         Slider(
           min: widget.minPrice,
           max: widget.maxPrice,
@@ -107,9 +115,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               child: TextField(
                 controller: _priceController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Max Price',
                   prefixText: '\$',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 onChanged: (value) {
                   if (value.isNotEmpty) {
@@ -122,7 +133,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               ),
             ),
             const SizedBox(width: 16),
-            TextButton(
+            OutlinedButton(
               onPressed: () {
                 setState(() {
                   _price = widget.maxPrice;
@@ -141,8 +152,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Maximum Stops: $_stops', style: Theme.of(context).textTheme.bodyLarge),
+        Text('Maximum Stops', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('0', style: Theme.of(context).textTheme.bodySmall),
+            Text('$_stops', style: Theme.of(context).textTheme.titleMedium),
+            Text('3', style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
         Slider(
           min: 0,
           max: 3,
@@ -163,6 +182,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   setState(() => _stops = index);
                 }
               },
+              selectedColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: Theme.of(context).cardTheme.color,
             );
           }),
         ),
@@ -174,13 +195,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Airlines', style: Theme.of(context).textTheme.bodyLarge),
+        Text('Airlines', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         if (widget.allAirlines.isEmpty)
           const Text('No airlines available', style: TextStyle(color: Colors.grey))
         else
           SizedBox(
-            height: 120,
+            height: 150,
             child: GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
@@ -203,6 +224,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       }
                     });
                   },
+                  selectedColor: Theme.of(context).colorScheme.primary,
+                  backgroundColor: Theme.of(context).cardTheme.color,
+                  checkmarkColor: Colors.white,
                 );
               },
             ),
@@ -211,11 +235,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            TextButton(
+            OutlinedButton(
               onPressed: () => setState(() => _airlines.clear()),
               child: const Text('Clear All'),
             ),
-            TextButton(
+            const SizedBox(width: 8),
+            OutlinedButton(
               onPressed: () => setState(() => _airlines = {...widget.allAirlines.toSet()}),
               child: const Text('Select All'),
             ),
@@ -248,6 +273,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             Navigator.pop(context);
           },
           child: const Text('Apply Filters'),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
         ),
       ],
     );

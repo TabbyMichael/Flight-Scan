@@ -143,7 +143,7 @@ async def get_flights():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-def parse_flight_dates(flight_data: Dict[str, Any]) -> tuple[datetime, datetime]:
+def parse_flight_dates(flight_data: Dict[str, Any]) -> tuple[Optional[datetime], Optional[datetime]]:
     """Extract departure and arrival datetimes from flight data"""
     segments = flight_data.get("FareItinerary", {}).get("AirItinerary", {}).get(
         "OriginDestinationOptions", {}).get("OriginDestinationOption", [{}])[0].get("FlightSegment", [])
@@ -154,17 +154,28 @@ def parse_flight_dates(flight_data: Dict[str, Any]) -> tuple[datetime, datetime]
     first_segment = segments[0]
     last_segment = segments[-1]
     
-    dep_time = datetime.strptime(
-        f"{first_segment.get('DepartureDateTime')} {first_segment.get('DepartureTimeZone', {}).get('GMTOffset', '+00:00')}",
-        "%Y-%m-%dT%H:%M %z"
-    )
+    # Fix the datetime format - the time string includes seconds and timezone offset format
+    dep_datetime_str = first_segment.get('DepartureDateTime', '')
+    dep_tz_str = first_segment.get('DepartureTimeZone', {}).get('GMTOffset', '+00:00')
     
-    arr_time = datetime.strptime(
-        f"{last_segment.get('ArrivalDateTime')} {last_segment.get('ArrivalTimeZone', {}).get('GMTOffset', '+00:00')}",
-        "%Y-%m-%dT%H:%M %z"
-    )
+    arr_datetime_str = last_segment.get('ArrivalDateTime', '')
+    arr_tz_str = last_segment.get('ArrivalTimeZone', {}).get('GMTOffset', '+00:00')
     
-    return dep_time, arr_time
+    try:
+        dep_time = datetime.strptime(
+            f"{dep_datetime_str} {dep_tz_str}",
+            "%Y-%m-%dT%H:%M:%S %z"
+        )
+        
+        arr_time = datetime.strptime(
+            f"{arr_datetime_str} {arr_tz_str}",
+            "%Y-%m-%dT%H:%M:%S %z"
+        )
+        
+        return dep_time, arr_time
+    except ValueError:
+        # If parsing fails, return None values
+        return None, None
 
 @app.post("/flights/search")
 async def search_flights(search: FlightSearch):
@@ -281,12 +292,15 @@ async def get_airports():
 @app.get("/airlines")
 async def get_airlines():
     """Return list of airlines"""
-    return load_json_data("airlines.json")
+    return load_json_data("airline-list.json")
 
 @app.get("/services")
 async def get_services():
     try:
-        return load_json_data("extra-services.json")
+        data = load_json_data("extra-services.json")
+        # Extract the services data from the nested structure
+        services_data = data.get("ExtraServicesResponse", {}).get("ExtraServicesResult", {}).get("ExtraServicesData", {})
+        return services_data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

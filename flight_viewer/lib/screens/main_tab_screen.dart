@@ -28,11 +28,7 @@ class MainTabScreen extends StatelessWidget {
               child: Consumer<ThemeProvider>(
                 builder: (context, themeProvider, child) {
                   return IconButton(
-                    icon: Icon(
-                      themeProvider.themeMode == ThemeMode.dark
-                          ? Icons.light_mode
-                          : Icons.dark_mode,
-                    ),
+                    icon: Icon(themeProvider.themeIcon),
                     onPressed: () {
                       themeProvider.toggleTheme();
                     },

@@ -51,11 +51,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
               return IconButton(
-                icon: Icon(
-                  themeProvider.themeMode == ThemeMode.dark
-                      ? Icons.light_mode
-                      : Icons.dark_mode,
-                ),
+                icon: Icon(themeProvider.themeIcon),
                 onPressed: () {
                   themeProvider.toggleTheme();
                 },
@@ -70,34 +66,72 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'First Name'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                onSaved: (v) => _firstName = v!,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Last Name'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                onSaved: (v) => _lastName = v!,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Passport Number'),
-                validator: (v) => v == null || v.isEmpty ? 'Required' : null,
-                onSaved: (v) => _passport = v!,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Email'),
-                keyboardType: TextInputType.emailAddress,
-                validator: (v) => v != null && v.contains('@') ? null : 'Enter valid email',
-                onSaved: (v) => _email = v!,
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Passenger Information', style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'First Name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                        onSaved: (v) => _firstName = v!,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Last Name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                        onSaved: (v) => _lastName = v!,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Passport Number',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        validator: (v) => v == null || v.isEmpty ? 'Required' : null,
+                        onSaved: (v) => _passport = v!,
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        validator: (v) => v != null && v.contains('@') ? null : 'Enter valid email',
+                        onSaved: (v) => _email = v!,
+                      ),
+                    ],
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _next,
-                child: const Text('Review & Pay'),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _next,
+                  child: const Text('Review & Pay'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
               ),
             ],
           ),

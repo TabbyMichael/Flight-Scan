@@ -20,11 +20,7 @@ class FlightDetailScreen extends StatelessWidget {
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
               return IconButton(
-                icon: Icon(
-                  themeProvider.themeMode == ThemeMode.dark
-                      ? Icons.light_mode
-                      : Icons.dark_mode,
-                ),
+                icon: Icon(themeProvider.themeIcon),
                 onPressed: () {
                   themeProvider.toggleTheme();
                 },
@@ -67,72 +63,141 @@ class FlightDetailScreen extends StatelessWidget {
                   children: [
                     Text(
                       '${flight.departureAirport} → ${flight.arrivalAirport}',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '${_formatDate(flight.departureTime)} • ${_formatDuration(flight.duration)}',
-                      style: TextStyle(
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.grey[600],
-                        fontSize: 14,
                       ),
                     ),
                   ],
                 ),
-                Chip(
-                  label: Text(
-                    '${flight.stops} ${flight.stops == 1 ? 'Stop' : 'Stops'}' ,
-                    style: const TextStyle(color: Colors.white),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: flight.stops == 0 
+                      ? Colors.green.shade500 
+                      : (flight.stops == 1 ? Colors.orange.shade500 : Colors.red.shade500),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  child: Text(
+                    '${flight.stops} ${flight.stops == 1 ? 'Stop' : 'Stops'}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            // Airline logo and name
+            const SizedBox(height: 24),
+            // Flight timeline visualization
+            Row(
+              children: [
+                Column(
+                  children: [
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: const BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    Container(
+                      width: 2,
+                      height: 40,
+                      color: Colors.grey,
+                    ),
+                    Container(
+                      width: 12,
+                      height: 12,
+                      decoration: const BoxDecoration(
+                        color: Colors.blue,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            flight.departureAirport,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          Text(
+                            _formatTime(flight.departureTime),
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 40),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            flight.arrivalAirport,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          Text(
+                            _formatTime(flight.arrivalTime),
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            // Airline info
             Row(
               children: [
                 _buildAirlineLogo(flight.airlineCode),
-                const SizedBox(width: 12),
-                Text(
-                  '${flight.airlineName} (${flight.airlineCode})',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        flight.airlineName,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Text(
+                        'Flight ${flight.flightNumber}',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
                   ),
                 ),
+                if (flight.cabinClass.isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Theme.of(context).colorScheme.primary),
+                    ),
+                    child: Text(
+                      flight.cabinClass,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Flight ${flight.flightNumber}',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
-              ),
-            ),
-            if (flight.cabinClass.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: Colors.blue[100]!),
-                ),
-                child: Text(
-                  flight.cabinClass,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.blue,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
           ],
         ),
       ),
@@ -169,21 +234,21 @@ class FlightDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Flight Details',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             const Divider(),
             _buildDetailRow('Airline', '${flight.airlineName} (${flight.airlineCode})'),
             _buildDetailRow('Flight Number', flight.flightNumber),
+            _buildDetailRow('Departure Terminal', 'Terminal 2'), // This would come from the API
+            _buildDetailRow('Arrival Terminal', 'Terminal 1'), // This would come from the API
             _buildDetailRow('Departure', _formatDateTime(flight.departureTime)),
             _buildDetailRow('Arrival', _formatDateTime(flight.arrivalTime)),
             _buildDetailRow('Duration', _formatDuration(flight.duration)),
             _buildDetailRow('Cabin Class', flight.cabinClass.isEmpty ? 'Economy' : flight.cabinClass),
             _buildDetailRow('Aircraft', 'Boeing 737-800'), // This would come from the API in a real app
+            _buildDetailRow('Baggage Allowance', '1 x 23kg checked bag'), // This would come from the API
           ],
         ),
       ),
@@ -269,54 +334,64 @@ class FlightDetailScreen extends StatelessWidget {
   }
 
   Widget _buildPriceSection(BuildContext context) {
+    final totalPrice = flight.price + 50;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Price Details',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Base Fare'),
-                Text('\$${flight.price.toStringAsFixed(2)}'),
+                Text('Base Fare', style: Theme.of(context).textTheme.bodyMedium),
+                Text('\$${flight.price.toStringAsFixed(2)}', style: Theme.of(context).textTheme.bodyMedium),
               ],
             ),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Taxes & Fees'),
-                const Text('\$50.00'),
+                Text('Taxes & Fees', style: Theme.of(context).textTheme.bodyMedium),
+                const Text('\$50.00', style: TextStyle(fontSize: 14)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Discount', style: Theme.of(context).textTheme.bodyMedium),
+                const Text('-\$10.00', style: TextStyle(fontSize: 14, color: Colors.green)),
               ],
             ),
             const Divider(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Total',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 Text(
-                  '\$${(flight.price + 50).toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 16,
+                  '\$${totalPrice.toStringAsFixed(2)}',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Price includes all taxes and fees',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.grey,
+              ),
             ),
           ],
         ),

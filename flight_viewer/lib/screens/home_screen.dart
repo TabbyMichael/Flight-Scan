@@ -31,11 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
               return IconButton(
-                icon: Icon(
-                  themeProvider.themeMode == ThemeMode.dark
-                      ? Icons.light_mode
-                      : Icons.dark_mode,
-                ),
+                icon: Icon(themeProvider.themeIcon),
                 onPressed: () {
                   themeProvider.toggleTheme();
                 },
@@ -85,56 +81,123 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           return ListView.builder(
+            padding: const EdgeInsets.all(16),
             itemCount: flightProvider.flights.length,
             itemBuilder: (context, index) {
               final flight = flightProvider.flights[index];
               return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ListTile(
-                  title: Text(
-                    '${flight.airlineCode} ${flight.flightNumber}',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  subtitle: Column(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 4),
-                      Text(
-                        '${flight.departureAirport} → ${flight.arrivalAirport}',
-                        style: Theme.of(context).textTheme.bodyLarge,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${_formatTime(flight.departureTime)} - ${_formatTime(flight.arrivalTime)}',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '\$${flight.price.toStringAsFixed(2)}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            '${flight.airlineCode} ${flight.flightNumber}',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: flight.stops == 0 
+                                ? Colors.green.shade100 
+                                : Colors.orange.shade100,
+                              borderRadius: BorderRadius.circular(8),
                             ),
+                            child: Text(
+                              '${flight.stops} ${flight.stops == 1 ? 'stop' : 'stops'}',
+                              style: TextStyle(
+                                color: flight.stops == 0 
+                                  ? Colors.green.shade800 
+                                  : Colors.orange.shade800,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      Text(
-                        '${flight.stops} ${flight.stops == 1 ? 'stop' : 'stops'}' ,
-                        style: Theme.of(context).textTheme.bodySmall,
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                flight.departureAirport,
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              Text(
+                                _formatTime(flight.departureTime),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Icon(
+                                Icons.flight_takeoff,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                              Text(
+                                _formatDuration(flight.duration),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                flight.arrivalAirport,
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              Text(
+                                _formatTime(flight.arrivalTime),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const Divider(height: 24),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Price from',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              Text(
+                                '\$${flight.price.toStringAsFixed(2)}',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FlightDetailScreen(flight: flight),
+                                ),
+                              );
+                            },
+                            child: const Text('View Details'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FlightDetailScreen(flight: flight),
-                      ),
-                    );
-                  },
                 ),
               );
             },
@@ -174,5 +237,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String _formatTime(DateTime time) {
     return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+  }
+
+  String _formatDuration(int minutes) {
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+    if (hours > 0) {
+      return '${hours}h ${mins}m';
+    } else {
+      return '${mins}m';
+    }
   }
 }

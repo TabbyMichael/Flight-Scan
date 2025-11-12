@@ -50,11 +50,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
               return IconButton(
-                icon: Icon(
-                  themeProvider.themeMode == ThemeMode.dark
-                      ? Icons.light_mode
-                      : Icons.dark_mode,
-                ),
+                icon: Icon(themeProvider.themeIcon),
                 onPressed: () {
                   themeProvider.toggleTheme();
                 },
@@ -107,6 +103,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               curve: Curves.ease,
                             ),
                     child: Text(_page == _pages.length - 1 ? 'Start' : 'Next'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
                   ),
                 ],
               ),
@@ -136,7 +135,14 @@ class _OnboardPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 120, color: Theme.of(context).colorScheme.primary),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 80, color: Theme.of(context).colorScheme.primary),
+          ),
           const SizedBox(height: 48),
           Text(title, style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 16),

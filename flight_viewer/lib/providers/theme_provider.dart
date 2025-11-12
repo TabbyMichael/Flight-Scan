@@ -58,4 +58,16 @@ class ThemeProvider with ChangeNotifier {
       setThemeMode(ThemeMode.dark);
     }
   }
+
+  IconData get themeIcon {
+    if (_themeMode == ThemeMode.dark) {
+      return Icons.light_mode; // Sun icon when in dark mode
+    } else {
+      return Icons.dark_mode; // Moon icon when in light mode
+    }
+  }
+
+  bool get isDarkMode {
+    return _themeMode == ThemeMode.dark;
+  }
 }

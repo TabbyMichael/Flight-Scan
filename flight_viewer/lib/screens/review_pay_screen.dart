@@ -29,11 +29,7 @@ class ReviewPayScreen extends StatelessWidget {
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
               return IconButton(
-                icon: Icon(
-                  themeProvider.themeMode == ThemeMode.dark
-                      ? Icons.light_mode
-                      : Icons.dark_mode,
-                ),
+                icon: Icon(themeProvider.themeIcon),
                 onPressed: () {
                   themeProvider.toggleTheme();
                 },
@@ -47,39 +43,87 @@ class ReviewPayScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Passenger', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text('$firstName $lastName'),
-            Text(passport),
-            Text(email),
-            const Divider(height: 32),
-            Text('Extras', style: Theme.of(context).textTheme.titleMedium),
-            ...selections.entries.map((e) => Text('${e.key}: x${e.value}')),
-            const Spacer(),
-            Text('Total: \$${totalCost.toStringAsFixed(2)}',
-                style: Theme.of(context).textTheme.titleLarge),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Passenger', style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
+                    Text('$firstName $lastName', style: Theme.of(context).textTheme.titleSmall),
+                    const SizedBox(height: 4),
+                    Text(passport, style: Theme.of(context).textTheme.bodyMedium),
+                    Text(email, style: Theme.of(context).textTheme.bodyMedium),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text('Success'),
-                      content: const Text('Booking confirmed!'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.popUntil(context, (r) => r.isFirst);
-                          },
-                          child: const Text('OK'),
-                        )
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Extras', style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
+                    ...selections.entries.map((e) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(e.key, style: Theme.of(context).textTheme.bodyMedium),
+                              Text('x${e.value}', style: Theme.of(context).textTheme.bodyMedium),
+                            ],
+                          ),
+                        )),
+                  ],
+                ),
+              ),
+            ),
+            const Spacer(),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Total', style: Theme.of(context).textTheme.titleMedium),
+                        Text('\$${totalCost.toStringAsFixed(2)}',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              color: Theme.of(context).colorScheme.primary,
+                            )),
                       ],
                     ),
-                  );
-                },
-                child: const Text('Pay & Confirm'),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              title: const Text('Success'),
+                              content: const Text('Booking confirmed!'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.popUntil(context, (r) => r.isFirst);
+                                  },
+                                  child: const Text('OK'),
+                                )
+                              ],
+                            ),
+                          );
+                        },
+                        child: const Text('Pay & Confirm'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

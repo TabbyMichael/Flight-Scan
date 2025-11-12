@@ -75,11 +75,7 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
               Consumer<ThemeProvider>(
                 builder: (context, themeProvider, child) {
                   return IconButton(
-                    icon: Icon(
-                      themeProvider.themeMode == ThemeMode.dark
-                          ? Icons.light_mode
-                          : Icons.dark_mode,
-                    ),
+                    icon: Icon(themeProvider.themeIcon),
                     onPressed: () {
                       themeProvider.toggleTheme();
                     },
@@ -89,64 +85,109 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Radio<TripType>(
-                value: TripType.roundTrip,
-                groupValue: _tripType,
-                onChanged: (v) => setState(() => _tripType = v!),
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardTheme.color,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Material(
+              type: MaterialType.transparency,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: RadioListTile<TripType>(
+                      title: const Text('Round Trip'),
+                      value: TripType.roundTrip,
+                      groupValue: _tripType,
+                      onChanged: (v) => setState(() => _tripType = v!),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                  ),
+                  Expanded(
+                    child: RadioListTile<TripType>(
+                      title: const Text('One Way'),
+                      value: TripType.oneWay,
+                      groupValue: _tripType,
+                      onChanged: (v) => setState(() => _tripType = v!),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                  ),
+                ],
               ),
-              const Text('Round Trip'),
-              const SizedBox(width: 16),
-              Radio<TripType>(
-                value: TripType.oneWay,
-                groupValue: _tripType,
-                onChanged: (v) => setState(() => _tripType = v!),
-              ),
-              const Text('One Way'),
-            ],
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _origCtrl,
-            decoration: const InputDecoration(labelText: 'From'),
+            decoration: InputDecoration(
+              labelText: 'From',
+              prefixIcon: const Icon(Icons.flight_takeoff),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _destCtrl,
-            decoration: const InputDecoration(labelText: 'To'),
+            decoration: InputDecoration(
+              labelText: 'To',
+              prefixIcon: const Icon(Icons.flight_land),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
           const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
-                child: InkWell(
-                  onTap: () => _pickDate(isDeparture: true),
-                  child: InputDecorator(
-                    decoration: const InputDecoration(labelText: 'Departure Date'),
-                    child: Text(_depDate == null ? 'Select date' : DateFormat.yMMMd().format(_depDate!)),
+                child: TextField(
+                  readOnly: true,
+                  controller: TextEditingController(text: _depDate == null ? '' : DateFormat.yMMMd().format(_depDate!)),
+                  decoration: InputDecoration(
+                    labelText: 'Departure Date',
+                    prefixIcon: const Icon(Icons.calendar_today),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
+                  onTap: () => _pickDate(isDeparture: true),
                 ),
               ),
               const SizedBox(width: 12),
               if (_tripType == TripType.roundTrip)
                 Expanded(
-                  child: InkWell(
-                    onTap: () => _pickDate(isDeparture: false),
-                    child: InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Return Date'),
-                      child: Text(_retDate == null ? 'Select date' : DateFormat.yMMMd().format(_retDate!)),
+                  child: TextField(
+                    readOnly: true,
+                    controller: TextEditingController(text: _retDate == null ? '' : DateFormat.yMMMd().format(_retDate!)),
+                    decoration: InputDecoration(
+                      labelText: 'Return Date',
+                      prefixIcon: const Icon(Icons.calendar_today),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
+                    onTap: () => _pickDate(isDeparture: false),
                   ),
                 ),
             ],
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<int>(
-            initialValue: _passengers,
-            decoration: const InputDecoration(labelText: 'Passengers'),
+            value: _passengers,
+            decoration: InputDecoration(
+              labelText: 'Passengers',
+              prefixIcon: const Icon(Icons.person),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
             items: List.generate(6, (i) => i + 1)
-                .map((n) => DropdownMenuItem(value: n, child: Text('$n Passenger${n > 1 ? 's' : ''}')))
+                .map((n) => DropdownMenuItem(
+                      value: n, 
+                      child: Text('$n Passenger${n > 1 ? 's' : ''}'),
+                    ))
                 .toList(),
             onChanged: (v) => setState(() => _passengers = v!),
           ),
@@ -157,6 +198,12 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
               onPressed: _search,
               icon: const Icon(Icons.search),
               label: const Text('Search Flights'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
           ),
         ],

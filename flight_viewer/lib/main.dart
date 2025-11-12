@@ -81,11 +81,15 @@ class _MyAppState extends State<MyApp> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1E88E5),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  elevation: 0,
+                  elevation: 2,
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               textTheme: TextTheme(
@@ -118,9 +122,17 @@ class _MyAppState extends State<MyApp> {
                 ),
                 labelLarge: const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
+              ),
+              cardTheme: const CardThemeData(
+                color: Colors.white,
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+                margin: EdgeInsets.all(8),
               ),
             ),
             darkTheme: ThemeData(
@@ -160,11 +172,15 @@ class _MyAppState extends State<MyApp> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF1E88E5),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  elevation: 0,
+                  elevation: 2,
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               textTheme: TextTheme(
@@ -197,7 +213,7 @@ class _MyAppState extends State<MyApp> {
                 ),
                 labelLarge: const TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),
               ),
@@ -207,6 +223,7 @@ class _MyAppState extends State<MyApp> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
+                margin: EdgeInsets.all(8),
               ),
             ),
             home: FutureBuilder<bool>(

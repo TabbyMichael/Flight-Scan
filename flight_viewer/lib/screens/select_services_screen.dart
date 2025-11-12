@@ -31,11 +31,7 @@ class _SelectServicesBody extends StatelessWidget {
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
               return IconButton(
-                icon: Icon(
-                  themeProvider.themeMode == ThemeMode.dark
-                      ? Icons.light_mode
-                      : Icons.dark_mode,
-                ),
+                icon: Icon(themeProvider.themeIcon),
                 onPressed: () {
                   themeProvider.toggleTheme();
                 },
@@ -51,8 +47,18 @@ class _SelectServicesBody extends StatelessWidget {
               : _ServiceList(),
       bottomNavigationBar: provider.isLoading
           ? null
-          : Padding(
+          : Container(
               padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -87,14 +93,20 @@ class _ServiceList extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(svc.name, style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 4),
-                Text(svc.description),
-                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('\$${svc.price.toStringAsFixed(2)} each'),
+                    Text(svc.name, style: Theme.of(context).textTheme.titleMedium),
+                    Text('\$${svc.price.toStringAsFixed(2)}', style: Theme.of(context).textTheme.titleMedium),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(svc.description, style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Quantity', style: Theme.of(context).textTheme.bodyMedium),
                     Row(
                       children: [
                         IconButton(
@@ -103,7 +115,16 @@ class _ServiceList extends StatelessWidget {
                               : null,
                           icon: const Icon(Icons.remove_circle_outline),
                         ),
-                        Text('$qty'),
+                        Container(
+                          width: 40,
+                          height: 40,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardTheme.color,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text('$qty', style: Theme.of(context).textTheme.titleMedium),
+                        ),
                         IconButton(
                           onPressed: qty < svc.maxQuantity
                               ? () => provider.setQuantity(svc.id, qty + 1)
