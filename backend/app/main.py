@@ -272,16 +272,27 @@ async def get_airports():
     airports = set()
     
     for item in flights.get("AirSearchResponse", {}).get("AirSearchResult", {}).get("FareItineraries", []):
-        for segment in item.get("FareItinerary", {}).get("AirItinerary", {}).get("OriginDestinationOptions", {}).get("OriginDestinationOption", [{}])[0].get("FlightSegment", []):
-            airports.add(segment.get("DepartureAirport", {}).get("LocationCode"))
-            airports.add(segment.get("ArrivalAirport", {}).get("LocationCode"))
+        od_options = item.get("FareItinerary", {}).get("OriginDestinationOptions", [])
+        if od_options:
+            for od_option in od_options:
+                options = od_option.get("OriginDestinationOption", [])
+                if options:
+                    for option in options:
+                        segment = option.get("FlightSegment", {})
+                        if segment:
+                            dep_airport = segment.get("DepartureAirportLocationCode")
+                            arr_airport = segment.get("ArrivalAirportLocationCode")
+                            if dep_airport:
+                                airports.add(dep_airport)
+                            if arr_airport:
+                                airports.add(arr_airport)
     
     return sorted([a for a in airports if a])  # Remove None and sort
 
 @app.get("/airlines")
 async def get_airlines():
     """Return list of airlines"""
-    return load_json_data("airlines.json")
+    return load_json_data("airline-list.json")
 
 @app.get("/services")
 async def get_services():
