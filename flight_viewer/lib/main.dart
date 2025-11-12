@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/main_tab_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/flight_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/auth_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,16 +22,25 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Future<bool>? _firstRun;
+  Future<bool>? _authCheck;
 
   @override
   void initState() {
     super.initState();
     _firstRun = _checkFirstRun();
+    _authCheck = _checkAuthStatus();
   }
 
   Future<bool> _checkFirstRun() async {
     final prefs = await SharedPreferences.getInstance();
     return !(prefs.getBool('onboarding_done') ?? false);
+  }
+
+  Future<bool> _checkAuthStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    final userId = prefs.getString('user_id');
+    return token != null && userId != null;
   }
 
   @override
@@ -38,9 +49,10 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider(create: (_) => FlightProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
+      child: Consumer2<ThemeProvider, AuthProvider>(
+        builder: (context, themeProvider, authProvider, child) {
           return MaterialApp(
             title: 'SkyScan Flight Viewer',
             debugShowCheckedModeBanner: false,
@@ -211,11 +223,25 @@ class _MyAppState extends State<MyApp> {
             ),
             home: FutureBuilder<bool>(
               future: _firstRun,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
+              builder: (context, firstRunSnapshot) {
+                if (!firstRunSnapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
-                return snapshot.data! ? const OnboardingScreen() : const MainTabScreen();
+                
+                if (firstRunSnapshot.data!) {
+                  return const OnboardingScreen();
+                }
+                
+                return FutureBuilder<bool>(
+                  future: _authCheck,
+                  builder: (context, authSnapshot) {
+                    if (!authSnapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    
+                    return authSnapshot.data! ? const MainTabScreen() : const LoginScreen();
+                  },
+                );
               },
             ),
           );

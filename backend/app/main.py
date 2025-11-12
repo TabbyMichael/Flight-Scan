@@ -9,9 +9,15 @@ from datetime import datetime, date, timedelta
 from pydantic import BaseModel, EmailStr, Field
 from uuid import UUID, uuid4
 from .booking_utils import BookingManager
+from .postgres_db import PostgresDatabaseManager
+from .validation import validate_booking_request, validate_user_registration, sanitize_input
+from .security import create_access_token, decode_access_token, hash_password, verify_password
+import hashlib
+import secrets
 
 # Initialize services
 booking_manager = BookingManager()
+database_manager = PostgresDatabaseManager()
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -20,13 +26,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+# CORS middleware - More secure configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8080"],  # Specific origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],  # Specific methods
+    allow_headers=["Authorization", "Content-Type"],  # Specific headers
+    expose_headers=["Content-Disposition"],
+    max_age=600,  # Cache preflight requests for 10 minutes
 )
 
 # Load data files
@@ -70,6 +78,24 @@ class BookingResponse(BaseModel):
     extras: Dict[str, int]
     total_price: float
     currency: str
+
+# Pydantic models for authentication
+class UserRegistration(BaseModel):
+    first_name: str
+    last_name: str
+    email: EmailStr
+    password: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+class UserResponse(BaseModel):
+    id: str
+    first_name: str
+    last_name: str
+    email: EmailStr
+    created_at: str
 
 # Routes
 @app.get("/")
@@ -140,8 +166,14 @@ async def get_flights():
             })
 
         return {"flights": simplified}
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="Flight data file not found")
+    except KeyError as e:
+        raise HTTPException(status_code=500, detail=f"Invalid flight data format: missing key {str(e)}")
+    except ValueError as e:
+        raise HTTPException(status_code=500, detail=f"Invalid flight data format: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to load flights: {str(e)}")
 
 def parse_flight_dates(flight_data: Dict[str, Any]) -> tuple[datetime, datetime]:
     """Extract departure and arrival datetimes from flight data"""
@@ -149,7 +181,7 @@ def parse_flight_dates(flight_data: Dict[str, Any]) -> tuple[datetime, datetime]
         "OriginDestinationOptions", {}).get("OriginDestinationOption", [{}])[0].get("FlightSegment", [])
     
     if not segments:
-        return None, None
+        return datetime.now(), datetime.now()
         
     first_segment = segments[0]
     last_segment = segments[-1]
@@ -262,33 +294,51 @@ async def search_flights(search: FlightSearch):
             })
             
         return {"flights": filtered_flights}
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="Flight data file not found")
+    except KeyError as e:
+        raise HTTPException(status_code=500, detail=f"Invalid flight data format: missing key {str(e)}")
+    except ValueError as e:
+        raise HTTPException(status_code=500, detail=f"Invalid flight data format: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to search flights: {str(e)}")
 
 @app.get("/airports")
 async def get_airports():
     """Return unique list of all airports from flights data"""
-    flights = load_json_data("flights.json")
-    airports = set()
-    
-    for item in flights.get("AirSearchResponse", {}).get("AirSearchResult", {}).get("FareItineraries", []):
-        for segment in item.get("FareItinerary", {}).get("AirItinerary", {}).get("OriginDestinationOptions", {}).get("OriginDestinationOption", [{}])[0].get("FlightSegment", []):
-            airports.add(segment.get("DepartureAirport", {}).get("LocationCode"))
-            airports.add(segment.get("ArrivalAirport", {}).get("LocationCode"))
-    
-    return sorted([a for a in airports if a])  # Remove None and sort
+    try:
+        flights = load_json_data("flights.json")
+        airports = set()
+        
+        for item in flights.get("AirSearchResponse", {}).get("AirSearchResult", {}).get("FareItineraries", []):
+            for segment in item.get("FareItinerary", {}).get("AirItinerary", {}).get("OriginDestinationOptions", {}).get("OriginDestinationOption", [{}])[0].get("FlightSegment", []):
+                airports.add(segment.get("DepartureAirport", {}).get("LocationCode"))
+                airports.add(segment.get("ArrivalAirport", {}).get("LocationCode"))
+        
+        return sorted([a for a in airports if a])  # Remove None and sort
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="Flight data file not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load airports: {str(e)}")
 
 @app.get("/airlines")
 async def get_airlines():
     """Return list of airlines"""
-    return load_json_data("airlines.json")
+    try:
+        return load_json_data("airlines.json")
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="Airlines data file not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load airlines: {str(e)}")
 
 @app.get("/services")
 async def get_services():
     try:
         return load_json_data("extra-services.json")
+    except FileNotFoundError:
+        raise HTTPException(status_code=500, detail="Services data file not found")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to load services: {str(e)}")
 
 @app.get("/trip/{pnr}", response_model=BookingResponse)
 async def get_trip_details(pnr: str):
@@ -301,16 +351,37 @@ async def get_trip_details(pnr: str):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve booking: {str(e)}")
 
 @app.post("/bookings", response_model=BookingResponse)
 async def create_booking(booking_request: CreateBookingRequest):
     """Create a new booking"""
     try:
+        # Sanitize inputs
+        sanitized_first_name = sanitize_input(booking_request.passenger.first_name)
+        sanitized_last_name = sanitize_input(booking_request.passenger.last_name)
+        sanitized_email = sanitize_input(booking_request.passenger.email)
+        sanitized_passport = sanitize_input(booking_request.passenger.passport)
+        
+        # Validate booking request
+        validate_booking_request(
+            flight_id=booking_request.flight_id,
+            first_name=sanitized_first_name,
+            last_name=sanitized_last_name,
+            email=sanitized_email,
+            passport=sanitized_passport,
+            total_price=booking_request.total_price
+        )
+        
         booking_data = {
             "flight_id": booking_request.flight_id,
-            "passenger": booking_request.passenger.dict(),
-            "passenger_email": booking_request.passenger.email,
+            "passenger": {
+                "first_name": sanitized_first_name,
+                "last_name": sanitized_last_name,
+                "email": sanitized_email,
+                "passport": sanitized_passport
+            },
+            "passenger_email": sanitized_email,
             "extras": booking_request.extras,
             "total_price": booking_request.total_price,
             "currency": booking_request.currency,
@@ -319,7 +390,7 @@ async def create_booking(booking_request: CreateBookingRequest):
         booking = booking_manager.create_booking(booking_data)
         return booking
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to create booking: {str(e)}")
 
 @app.get("/bookings", response_model=List[BookingResponse])
 async def get_user_bookings(email: str = Query(..., description="User's email address")):
@@ -327,7 +398,96 @@ async def get_user_bookings(email: str = Query(..., description="User's email ad
     try:
         return booking_manager.get_user_bookings(email)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve bookings: {str(e)}")
+
+@app.post("/auth/register", response_model=UserResponse)
+async def register_user(user_data: UserRegistration):
+    """Register a new user"""
+    try:
+        # Sanitize inputs
+        sanitized_first_name = sanitize_input(user_data.first_name)
+        sanitized_last_name = sanitize_input(user_data.last_name)
+        sanitized_email = sanitize_input(user_data.email)
+        
+        # Validate user registration data
+        validate_user_registration(
+            first_name=sanitized_first_name,
+            last_name=sanitized_last_name,
+            email=sanitized_email,
+            password=user_data.password
+        )
+        
+        # Check if user already exists
+        existing_user = database_manager.get_user_by_email(sanitized_email)
+        if existing_user:
+            raise HTTPException(status_code=400, detail="User with this email already exists")
+        
+        # Create new user
+        user_id = str(uuid4())
+        new_user = {
+            "id": user_id,
+            "first_name": sanitized_first_name,
+            "last_name": sanitized_last_name,
+            "email": sanitized_email,
+            "password_hash": hash_password(user_data.password),
+            "created_at": datetime.utcnow().isoformat()
+        }
+        
+        # Save user to database
+        success = database_manager.create_user(new_user)
+        if not success:
+            raise HTTPException(status_code=500, detail="Failed to create user")
+        
+        return UserResponse(
+            id=user_id,
+            first_name=sanitized_first_name,
+            last_name=sanitized_last_name,
+            email=sanitized_email,
+            created_at=new_user["created_at"]
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to register user: {str(e)}")
+
+@app.post("/auth/login")
+async def login_user(credentials: UserLogin):
+    """Login user and return JWT token"""
+    try:
+        # Find user
+        user = database_manager.get_user_by_email(credentials.email)
+        
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        # Verify password
+        if not verify_password(user["password_hash"], credentials.password):
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        # Create JWT token
+        access_token = create_access_token(
+            data={
+                "user_id": user["id"],
+                "email": user["email"],
+                "first_name": user["first_name"],
+                "last_name": user["last_name"]
+            }
+        )
+        
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "id": user["id"],
+                "email": user["email"],
+                "first_name": user["first_name"],
+                "last_name": user["last_name"]
+            }
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to login user: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn

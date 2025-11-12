@@ -4,10 +4,13 @@ import '../providers/theme_provider.dart';
 import 'review_pay_screen.dart';
 
 class PassengerDetailsScreen extends StatefulWidget {
+  final String flightId;
   final double totalCost;
   final Map<String, int> selections;
+  
   const PassengerDetailsScreen({
     super.key,
+    required this.flightId,
     required this.totalCost,
     required this.selections,
   });
@@ -31,6 +34,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => ReviewPayScreen(
+          flightId: widget.flightId,
           totalCost: widget.totalCost,
           selections: widget.selections,
           firstName: _firstName,

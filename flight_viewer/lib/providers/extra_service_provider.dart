@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/extra_service.dart';
 import '../services/api_service.dart';
+import '../utils/error_handler.dart';
 
 class ExtraServiceProvider with ChangeNotifier {
   final ApiService _api = ApiService();
@@ -35,7 +36,7 @@ class ExtraServiceProvider with ChangeNotifier {
         if (s.isMandatory) _selectedQty[s.id] = s.minQuantity;
       }
     } catch (e) {
-      _error = e.toString();
+      _error = ErrorHandler.formatErrorMessage(e);
     } finally {
       _loading = false;
       notifyListeners();

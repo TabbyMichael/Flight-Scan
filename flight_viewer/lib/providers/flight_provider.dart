@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/flight.dart';
 import '../services/api_service.dart';
+import '../utils/error_handler.dart';
 
 class FlightProvider with ChangeNotifier {
   final ApiService _apiService = ApiService();
@@ -23,7 +24,7 @@ class FlightProvider with ChangeNotifier {
       _flights = List.from(_allFlights);
       _error = null;
     } catch (e) {
-      _error = e.toString();
+      _error = ErrorHandler.formatErrorMessage(e);
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -65,7 +66,7 @@ class FlightProvider with ChangeNotifier {
       );
       _error = null;
     } catch (e) {
-      _error = e.toString();
+      _error = ErrorHandler.formatErrorMessage(e);
     } finally {
       _isLoading = false;
       notifyListeners();

@@ -13,13 +13,15 @@ class SelectServicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => ExtraServiceProvider()..fetchServices(),
-      child: const _SelectServicesBody(),
+      child: _SelectServicesBody(flight: flight),
     );
   }
 }
 
 class _SelectServicesBody extends StatelessWidget {
-  const _SelectServicesBody();
+  final Flight flight;
+  
+  const _SelectServicesBody({required this.flight});
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +61,7 @@ class _SelectServicesBody extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => PassengerDetailsScreen(
+                        flightId: flight.id,
                         totalCost: provider.totalCost,
                         selections: provider.selections,
                       ),
