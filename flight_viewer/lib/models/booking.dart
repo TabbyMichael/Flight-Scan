@@ -21,27 +21,34 @@ class Booking {
     required this.createdAt,
   });
 
-  factory Booking.fromJson(Map<String, dynamic> json) => Booking(
-        id: json['id'],
-        flightId: json['flightId'],
-        extras: Map<String, int>.from(json['extras']),
-        firstName: json['firstName'],
-        lastName: json['lastName'],
-        passport: json['passport'],
-        email: json['email'],
-        totalCost: (json['totalCost'] as num).toDouble(),
-        createdAt: DateTime.parse(json['createdAt']),
-      );
+  factory Booking.fromJson(Map<String, dynamic> json) {
+    // Handle the nested passenger structure from backend
+    final passenger = json['passenger'] as Map<String, dynamic>? ?? {};
+    
+    return Booking(
+      id: json['id'] as String? ?? '',
+      flightId: json['flight_id'] as String? ?? '',
+      extras: Map<String, int>.from(json['extras'] as Map? ?? {}),
+      firstName: passenger['first_name'] as String? ?? '',
+      lastName: passenger['last_name'] as String? ?? '',
+      passport: passenger['passport'] as String? ?? '',
+      email: passenger['email'] as String? ?? '',
+      totalCost: (json['total_price'] as num?)?.toDouble() ?? 0.0,
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ?? DateTime.now(),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'flightId': flightId,
+        'flight_id': flightId,
         'extras': extras,
-        'firstName': firstName,
-        'lastName': lastName,
-        'passport': passport,
-        'email': email,
-        'totalCost': totalCost,
-        'createdAt': createdAt.toIso8601String(),
+        'passenger': {
+          'first_name': firstName,
+          'last_name': lastName,
+          'passport': passport,
+          'email': email,
+        },
+        'total_price': totalCost,
+        'created_at': createdAt.toIso8601String(),
       };
 }

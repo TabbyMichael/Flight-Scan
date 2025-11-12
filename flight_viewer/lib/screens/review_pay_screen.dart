@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/flight.dart';
+import '../providers/extra_service_provider.dart';
+import '../providers/booking_provider.dart';
 import '../providers/theme_provider.dart';
 
 class ReviewPayScreen extends StatelessWidget {
+  final Flight flight;
   final double totalCost;
   final Map<String, int> selections;
   final String firstName;
@@ -12,6 +16,7 @@ class ReviewPayScreen extends StatelessWidget {
 
   const ReviewPayScreen({
     super.key,
+    required this.flight,
     required this.totalCost,
     required this.selections,
     required this.firstName,
@@ -22,6 +27,51 @@ class ReviewPayScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ExtraServiceProvider()..fetchServices()),
+        ChangeNotifierProvider(create: (_) => BookingProvider()),
+      ],
+      child: _ReviewPayBody(
+        flight: flight,
+        totalCost: totalCost,
+        selections: selections,
+        firstName: firstName,
+        lastName: lastName,
+        passport: passport,
+        email: email,
+      ),
+    );
+  }
+}
+
+class _ReviewPayBody extends StatelessWidget {
+  final Flight flight;
+  final double totalCost;
+  final Map<String, int> selections;
+  final String firstName;
+  final String lastName;
+  final String passport;
+  final String email;
+
+  const _ReviewPayBody({
+    required this.flight,
+    required this.totalCost,
+    required this.selections,
+    required this.firstName,
+    required this.lastName,
+    required this.passport,
+    required this.email,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final extraProvider = context.watch<ExtraServiceProvider>();
+    final bookingProvider = context.watch<BookingProvider>();
+    
+    // Calculate extras cost (total - flight price)
+    final extrasCost = totalCost - flight.price;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Review & Pay'),
@@ -42,49 +92,283 @@ class ReviewPayScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Passenger', style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text('$firstName $lastName'),
-            Text(passport),
-            Text(email),
-            const Divider(height: 32),
-            Text('Extras', style: Theme.of(context).textTheme.titleMedium),
-            ...selections.entries.map((e) => Text('${e.key}: x${e.value}')),
-            const Spacer(),
-            Text('Total: \$${totalCost.toStringAsFixed(2)}',
-                style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text('Success'),
-                      content: const Text('Booking confirmed!'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.popUntil(context, (r) => r.isFirst);
-                          },
-                          child: const Text('OK'),
+      body: extraProvider.isLoading || bookingProvider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : (extraProvider.error != null || bookingProvider.error != null)
+              ? Center(child: Text('Error: ${extraProvider.error ?? bookingProvider.error}'))
+              : Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Flight Details', style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 4),
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${flight.airlineName} (${flight.airlineCode}) ${flight.flightNumber}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text('${flight.departureAirport} → ${flight.arrivalAirport}'),
+                              Text('Duration: ${_formatDuration(flight.duration)}'),
+                              const SizedBox(height: 8),
+                              Text(
+                                '\$${flight.price.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      Text('Passenger', style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 4),
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('$firstName $lastName'),
+                              Text(passport),
+                              Text(email),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      Text('Extras', style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 8),
+                      if (selections.isEmpty)
+                        const Card(
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Text('No extras selected'),
+                          ),
                         )
+                      else
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              children: [
+                                ..._buildSelectedExtrasList(extraProvider),
+                                const Divider(height: 24),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'Extras Total',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '\$${extrasCost.toStringAsFixed(2)}',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      
+                      const Spacer(),
+                      
+                      // Price summary
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('Flight Price'),
+                                  Text('\$${flight.price.toStringAsFixed(2)}'),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('Extras'),
+                                  Text('\$${extrasCost.toStringAsFixed(2)}'),
+                                ],
+                              ),
+                              const Divider(height: 24),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text(
+                                    'Total',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    '\$${totalCost.toStringAsFixed(2)}',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: bookingProvider.isLoading ? null : () => _confirmBooking(context),
+                          child: bookingProvider.isLoading
+                              ? const CircularProgressIndicator()
+                              : const Text('Pay & Confirm'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+    );
+  }
+  
+  List<Widget> _buildSelectedExtrasList(ExtraServiceProvider provider) {
+    final List<Widget> items = [];
+    
+    selections.forEach((id, qty) {
+      if (qty > 0) {
+        final service = provider.getServiceById(id);
+        if (service != null) {
+          items.add(
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          service.name,
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        Text(
+                          service.category,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
                       ],
                     ),
-                  );
-                },
-                child: const Text('Pay & Confirm'),
+                  ),
+                  Text('x$qty'),
+                  Text('\$${(service.price * qty).toStringAsFixed(2)}'),
+                ],
               ),
             ),
+          );
+        } else {
+          // Fallback for services not found
+          items.add(
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Service $id'),
+                  Text('x$qty'),
+                  // We can't calculate price without the service object
+                ],
+              ),
+            ),
+          );
+        }
+      }
+    });
+    
+    return items;
+  }
+  
+  String _formatDuration(int minutes) {
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+    if (hours > 0) {
+      return '${hours}h ${mins}m';
+    } else {
+      return '${mins}m';
+    }
+  }
+  
+  void _confirmBooking(BuildContext context) async {
+    final bookingProvider = context.read<BookingProvider>();
+    
+    try {
+      await bookingProvider.createBooking(
+        flightId: flight.id, // This is the correct flight ID
+        firstName: firstName,
+        lastName: lastName,
+        passport: passport,
+        email: email,
+        extras: selections,
+        totalCost: totalCost,
+      );
+      
+      // Show success dialog
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Success'),
+          content: const Text('Booking confirmed! Your booking has been saved.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.popUntil(context, (r) => r.isFirst);
+              },
+              child: const Text('OK'),
+            )
           ],
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      // Show error dialog
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Error'),
+          content: Text('Failed to create booking: $e'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('OK'),
+            )
+          ],
+        ),
+      );
+    }
   }
 }

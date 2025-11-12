@@ -281,7 +281,7 @@ async def get_airports():
 @app.get("/airlines")
 async def get_airlines():
     """Return list of airlines"""
-    return load_json_data("airlines.json")
+    return load_json_data("airline-list.json")
 
 @app.get("/services")
 async def get_services():

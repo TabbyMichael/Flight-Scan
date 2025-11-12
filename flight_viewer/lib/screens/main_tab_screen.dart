@@ -3,10 +3,24 @@ import 'package:provider/provider.dart';
 import 'search_form_screen.dart';
 import 'my_bookings_screen.dart';
 import '../providers/theme_provider.dart';
+import '../providers/booking_provider.dart';
 
 class MainTabScreen extends StatelessWidget {
   const MainTabScreen({super.key});
 
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => BookingProvider()),
+      ],
+      child: _MainTabScreenContent(),
+    );
+  }
+}
+
+class _MainTabScreenContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(

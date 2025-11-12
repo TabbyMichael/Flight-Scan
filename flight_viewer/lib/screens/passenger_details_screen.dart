@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/flight.dart';
 import '../providers/theme_provider.dart';
 import 'review_pay_screen.dart';
 
 class PassengerDetailsScreen extends StatefulWidget {
+  final Flight flight;
   final double totalCost;
   final Map<String, int> selections;
+  
   const PassengerDetailsScreen({
     super.key,
+    required this.flight,
     required this.totalCost,
     required this.selections,
   });
@@ -31,6 +35,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
       context,
       MaterialPageRoute(
         builder: (_) => ReviewPayScreen(
+          flight: widget.flight,
           totalCost: widget.totalCost,
           selections: widget.selections,
           firstName: _firstName,
@@ -70,6 +75,51 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
           key: _formKey,
           child: ListView(
             children: [
+              // Flight info summary
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${widget.flight.airlineName} (${widget.flight.airlineCode})',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${widget.flight.departureAirport} → ${widget.flight.arrivalAirport}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Total: \$${widget.totalCost.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              // Passenger details form
+              const Text(
+                'Passenger Information',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'First Name'),
                 validator: (v) => v == null || v.isEmpty ? 'Required' : null,

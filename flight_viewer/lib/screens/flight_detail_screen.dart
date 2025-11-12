@@ -216,8 +216,7 @@ class FlightDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSegmentItem(dynamic segment, BuildContext context) {
-    // This is a simplified implementation. In a real app, you would have a proper Segment model.
+  Widget _buildSegmentItem(Segment segment, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -226,12 +225,12 @@ class FlightDetailScreen extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '${segment['departure']} → ${segment['arrival']}',
+              '${segment.departureAirport} → ${segment.arrivalAirport}',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
           Text(
-            '${segment['duration']} min',
+            '${segment.duration} min',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
