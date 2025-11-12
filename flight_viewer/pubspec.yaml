@@ -54,6 +54,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -68,7 +69,10 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/logo.svg
+    - assets/images/plane4_generated.jpg
+    - assets/images/app_icon.png
+    - assets/images/splash_light.png
+    - assets/images/splash_dark.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -95,3 +99,27 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Flutter native splash configuration
+flutter_native_splash:
+  # Background color for the splash screen
+  color: "#FFFFFF"
+  # Dark background color for the splash screen
+  color_dark: "#121212"
+  # Image for the splash screen
+  image: assets/images/splash_light.png
+  # Dark image for the splash screen
+  image_dark: assets/images/splash_dark.png
+  # iOS specific settings
+  ios: true
+  # Full screen mode
+  fullscreen: true
+
+# Flutter launcher icons configuration
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_icon.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true
+  background_color_ios: "#FFFFFF"

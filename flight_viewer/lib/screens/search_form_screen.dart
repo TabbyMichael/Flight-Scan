@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/flight_provider.dart';
+import '../providers/theme_provider.dart';
 import 'home_screen.dart';
 
 class SearchFormScreen extends StatefulWidget {
@@ -60,9 +61,33 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Search Flights', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 4),
-          Text('Find the best flights for your journey', style: Theme.of(context).textTheme.bodyMedium),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Search Flights', style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 4),
+                  Text('Find the best flights for your journey', style: Theme.of(context).textTheme.bodyMedium),
+                ],
+              ),
+              Consumer<ThemeProvider>(
+                builder: (context, themeProvider, child) {
+                  return IconButton(
+                    icon: Icon(
+                      themeProvider.themeMode == ThemeMode.dark
+                          ? Icons.light_mode
+                          : Icons.dark_mode,
+                    ),
+                    onPressed: () {
+                      themeProvider.toggleTheme();
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
           Row(
             children: [
