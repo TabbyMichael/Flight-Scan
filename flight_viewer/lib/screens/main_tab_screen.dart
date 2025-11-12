@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'search_form_screen.dart';
 import 'my_bookings_screen.dart';
+import '../providers/theme_provider.dart';
 
 class MainTabScreen extends StatelessWidget {
   const MainTabScreen({super.key});
@@ -20,6 +22,25 @@ class MainTabScreen extends StatelessWidget {
               Text('Find and manage your flights', style: TextStyle(fontSize: 14, color: Colors.grey),),
             ],
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Consumer<ThemeProvider>(
+                builder: (context, themeProvider, child) {
+                  return IconButton(
+                    icon: Icon(
+                      themeProvider.themeMode == ThemeMode.dark
+                          ? Icons.light_mode
+                          : Icons.dark_mode,
+                    ),
+                    onPressed: () {
+                      themeProvider.toggleTheme();
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(46),
             child: Container(

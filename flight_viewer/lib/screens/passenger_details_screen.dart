@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 import 'review_pay_screen.dart';
 
 class PassengerDetailsScreen extends StatefulWidget {
@@ -43,7 +45,25 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Passenger Details')),
+      appBar: AppBar(
+        title: const Text('Passenger Details'),
+        actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(
+                  themeProvider.themeMode == ThemeMode.dark
+                      ? Icons.light_mode
+                      : Icons.dark_mode,
+                ),
+                onPressed: () {
+                  themeProvider.toggleTheme();
+                },
+              );
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

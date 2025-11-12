@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/flight.dart';
 import '../providers/extra_service_provider.dart';
+import '../providers/theme_provider.dart';
 import 'passenger_details_screen.dart';
 
 class SelectServicesScreen extends StatelessWidget {
@@ -24,7 +25,25 @@ class _SelectServicesBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<ExtraServiceProvider>();
     return Scaffold(
-      appBar: AppBar(title: const Text('Extra Services')),
+      appBar: AppBar(
+        title: const Text('Extra Services'),
+        actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(
+                  themeProvider.themeMode == ThemeMode.dark
+                      ? Icons.light_mode
+                      : Icons.dark_mode,
+                ),
+                onPressed: () {
+                  themeProvider.toggleTheme();
+                },
+              );
+            },
+          ),
+        ],
+      ),
       body: provider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : provider.error != null

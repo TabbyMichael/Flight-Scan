@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class ReviewPayScreen extends StatelessWidget {
   final double totalCost;
@@ -21,7 +23,25 @@ class ReviewPayScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Review & Pay')),
+      appBar: AppBar(
+        title: const Text('Review & Pay'),
+        actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(
+                  themeProvider.themeMode == ThemeMode.dark
+                      ? Icons.light_mode
+                      : Icons.dark_mode,
+                ),
+                onPressed: () {
+                  themeProvider.toggleTheme();
+                },
+              );
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

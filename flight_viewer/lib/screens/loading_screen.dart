@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/theme_provider.dart';
 
 class LoadingScreen extends StatelessWidget {
   final String message;
@@ -8,6 +10,24 @@ class LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(
+                  themeProvider.themeMode == ThemeMode.dark
+                      ? Icons.light_mode
+                      : Icons.dark_mode,
+                ),
+                onPressed: () {
+                  themeProvider.toggleTheme();
+                },
+              );
+            },
+          ),
+        ],
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

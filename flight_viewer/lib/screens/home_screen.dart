@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/flight_provider.dart';
+import '../providers/theme_provider.dart';
 import 'flight_detail_screen.dart';
 import '../widgets/filter_bottom_sheet.dart';
 
@@ -27,6 +28,20 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('SkyScan Flights'),
         actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(
+                  themeProvider.themeMode == ThemeMode.dark
+                      ? Icons.light_mode
+                      : Icons.dark_mode,
+                ),
+                onPressed: () {
+                  themeProvider.toggleTheme();
+                },
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.filter_alt),
             onPressed: () {
