@@ -202,6 +202,7 @@ class ApiService {
     required double totalCost,
   }) async {
     try {
+      print('Creating booking with flight ID: $flightId');
       final response = await http.post(
         Uri.parse('$baseUrl/bookings'),
         headers: {'Content-Type': 'application/json'},
@@ -215,16 +216,35 @@ class ApiService {
           },
           'extras': extras,
           'total_price': totalCost,
+          'currency': 'USD',
         }),
       );
       
-      if (response.statusCode == 200) {
+      print('Booking response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final Map<String, dynamic> responseData = json.decode(response.body);
         _hapticsService.success();
-        return Booking.fromJson(responseData);
+        
+        // Transform the response to match our Booking model
+        final bookingData = {
+          'id': responseData['id'] ?? '',
+          'flightId': responseData['flight_id'] ?? '',
+          'firstName': responseData['passenger']?['first_name'] ?? '',
+          'lastName': responseData['passenger']?['last_name'] ?? '',
+          'passport': responseData['passenger']?['passport'] ?? '',
+          'email': responseData['passenger_email'] ?? responseData['passenger']?['email'] ?? '',
+          'extras': responseData['extras'] ?? {},
+          'totalCost': (responseData['total_price'] ?? 0.0).toDouble(),
+          'createdAt': responseData['created_at'] ?? DateTime.now().toIso8601String(),
+        };
+        
+        return Booking.fromJson(bookingData);
       } else {
+        final errorData = json.decode(response.body);
         _hapticsService.error();
-        throw Exception('Failed to create booking: ${response.statusCode}');
+        throw Exception('Failed to create booking: ${errorData['detail'] ?? response.statusCode}');
       }
     } catch (e) {
       _hapticsService.error();
@@ -232,14 +252,37 @@ class ApiService {
     }
   }
   
-  // Add method to fetch user bookings
+  // Fetch all bookings for a specific user by email
   Future<List<Booking>> fetchUserBookings(String email) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/bookings?email=$email'));
+      print('Fetching bookings for email: $email');
+      final response = await http.get(
+        Uri.parse('$baseUrl/bookings').replace(
+          queryParameters: {'email': email},
+        ),
+      );
+      
+      print('Bookings response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
       
       if (response.statusCode == 200) {
-        final List<dynamic> jsonList = json.decode(response.body);
-        return jsonList.map((json) => Booking.fromJson(json)).toList();
+        final responseBody = json.decode(response.body);
+        final List<dynamic> bookingsList = responseBody is List ? responseBody : [];
+        
+        return bookingsList.map((json) {
+          // Transform each booking to match our model
+          return Booking.fromJson({
+            'id': json['id'] ?? '',
+            'flight_id': json['flight_id'] ?? '',
+            'first_name': json['passenger']?['first_name'] ?? '',
+            'last_name': json['passenger']?['last_name'] ?? '',
+            'passport': json['passenger']?['passport'] ?? '',
+            'email': json['passenger_email'] ?? json['passenger']?['email'] ?? '',
+            'extras': json['extras'] ?? {},
+            'total_price': json['total_price'] ?? 0.0,
+            'created_at': json['created_at'] ?? DateTime.now().toIso8601String(),
+          });
+        }).toList();
       } else {
         _hapticsService.error();
         throw Exception('Failed to load bookings: ${response.statusCode}');

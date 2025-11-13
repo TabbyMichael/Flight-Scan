@@ -129,23 +129,9 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
                   Text('Find the best flights for your journey', style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
-              Consumer<ThemeProvider>(
-                builder: (context, themeProvider, child) {
-                  return IconButton(
-                    icon: Icon(
-                      themeProvider.themeMode == ThemeMode.dark
-                          ? Icons.light_mode
-                          : Icons.dark_mode,
-                    ),
-                    onPressed: () {
-                      themeProvider.toggleTheme();
-                    },
-                  );
-                },
-              ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Row(
             children: [
               Radio<TripType>(
@@ -163,7 +149,7 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
               const Text('One Way'),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 20),
           TextField(
             controller: _origCtrl,
             decoration: const InputDecoration(
@@ -171,7 +157,7 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
               hintText: 'e.g., JFK',
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 20),
           TextField(
             controller: _destCtrl,
             decoration: const InputDecoration(
@@ -179,7 +165,7 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
               hintText: 'e.g., LAX',
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 20),
           Row(
             children: [
               Expanded(
@@ -208,7 +194,7 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
                 ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 20),
           DropdownButtonFormField<int>(
             value: _passengers,
             decoration: const InputDecoration(labelText: 'Passengers'),

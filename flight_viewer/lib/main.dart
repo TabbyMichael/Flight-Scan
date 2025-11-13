@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'screens/main_tab_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/flight_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/booking_provider.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +40,7 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider(create: (_) => FlightProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => BookingProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -53,17 +56,49 @@ class _MyAppState extends State<MyApp> {
                 surface: Colors.white,
                 background: const Color(0xFFF5F5F5),
               ),
+              textTheme: GoogleFonts.robotoTextTheme(
+                Theme.of(context).textTheme.copyWith(
+                  displayLarge: const TextStyle(
+                    fontSize: 28,  // Increased from 24
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  displayMedium: const TextStyle(
+                    fontSize: 24,  // Increased from 20
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                  bodyLarge: const TextStyle(
+                    fontSize: 18,  // Increased from 16
+                    color: Colors.black,
+                  ),
+                  bodyMedium: const TextStyle(
+                    fontSize: 16,  // Increased from 14
+                    color: Colors.black,
+                  ),
+                  titleLarge: const TextStyle(
+                    fontSize: 22,  // Increased from 18
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                  labelLarge: const TextStyle(
+                    fontSize: 18,  // Increased from 16
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
               scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-              appBarTheme: const AppBarTheme(
+              appBarTheme: AppBarTheme(
                 elevation: 0,
                 centerTitle: true,
                 backgroundColor: Colors.white,
-                titleTextStyle: TextStyle(
+                titleTextStyle: GoogleFonts.roboto(
                   color: Colors.black87,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
-                iconTheme: IconThemeData(color: Colors.black87),
+                iconTheme: const IconThemeData(color: Colors.black87),
               ),
               inputDecorationTheme: InputDecorationTheme(
                 filled: true,
@@ -86,51 +121,51 @@ class _MyAppState extends State<MyApp> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 0,
-                ),
-              ),
-              textTheme: TextTheme(
-                titleLarge: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-                titleMedium: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-                titleSmall: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
-                bodyLarge: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                ),
-                bodyMedium: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black87,
-                ),
-                bodySmall: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.black54,
-                ),
-                labelLarge: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
+                  textStyle: GoogleFonts.roboto(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
-            darkTheme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color(0xFF1E88E5),
-                brightness: Brightness.dark,
-                primary: const Color(0xFF64B5F6),
-                secondary: const Color(0xFF1E88E5),
-                surface: const Color(0xFF1E1E1E),
-                background: const Color(0xFF121212),
+            darkTheme: ThemeData.dark().copyWith(
+              colorScheme: const ColorScheme.dark(
+                primary: Color(0xFF90CAF9),
+                secondary: Color(0xFF64B5F6),
+                surface: Color(0xFF121212),
+                background: Color(0xFF121212),
+              ),
+              textTheme: GoogleFonts.robotoTextTheme(
+                Theme.of(context).textTheme.copyWith(
+                  displayLarge: const TextStyle(
+                    fontSize: 28,  // Increased from 24
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  displayMedium: const TextStyle(
+                    fontSize: 24,  // Increased from 20
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                  bodyLarge: const TextStyle(
+                    fontSize: 18,  // Increased from 16
+                    color: Colors.white,
+                  ),
+                  bodyMedium: const TextStyle(
+                    fontSize: 16,  // Increased from 14
+                    color: Colors.white70,
+                  ),
+                  titleLarge: const TextStyle(
+                    fontSize: 22,  // Increased from 18
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  labelLarge: const TextStyle(
+                    fontSize: 18,  // Increased from 16
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                ),
               ),
               scaffoldBackgroundColor: const Color(0xFF121212),
               appBarTheme: const AppBarTheme(
@@ -165,48 +200,20 @@ class _MyAppState extends State<MyApp> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   elevation: 0,
+                  textStyle: GoogleFonts.roboto(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-              textTheme: TextTheme(
-                titleLarge: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-                titleMedium: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-                titleSmall: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
-                ),
-                bodyLarge: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
-                bodyMedium: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.white70,
-                ),
-                bodySmall: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white60,
-                ),
-                labelLarge: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
-                ),
-              ),
-              cardTheme: const CardThemeData(
-                color: Color(0xFF1E1E1E),
+              cardTheme: ThemeData.dark().cardTheme.copyWith(
+                color: const Color(0xFF1E1E1E),
                 elevation: 2,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                margin: const EdgeInsets.all(8.0),
               ),
             ),
             home: FutureBuilder<bool>(
