@@ -20,7 +20,7 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
   DateTime? _depDate;
   DateTime? _retDate;
   int _passengers = 1;
-  TripType _tripType = TripType.roundTrip;
+  TripType _tripType = TripType.oneWay; // Changed default to oneWay for simplicity
 
   Future<void> _pickDate({required bool isDeparture}) async {
     final now = DateTime.now();
@@ -45,13 +45,60 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
     }
   }
 
-  void _search() {
+  void _search() async {
     final provider = context.read<FlightProvider>();
-    provider.fetchFlights(); // For now, simply reload all flights
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
+    
+    // Show loading indicator
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      );
+    }
+    
+    try {
+      // Perform search with form data
+      await provider.searchFlights(
+        origin: _origCtrl.text.isNotEmpty ? _origCtrl.text : null,
+        destination: _destCtrl.text.isNotEmpty ? _destCtrl.text : null,
+        departureDate: _depDate,
+      );
+      
+      if (mounted) {
+        Navigator.pop(context); // Dismiss loading dialog
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context); // Dismiss loading dialog
+        // Show error dialog
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Search Error'),
+              content: Text('Failed to search flights: $e'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
   }
 
   @override
@@ -109,12 +156,18 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
           const SizedBox(height: 12),
           TextField(
             controller: _origCtrl,
-            decoration: const InputDecoration(labelText: 'From'),
+            decoration: const InputDecoration(
+              labelText: 'From',
+              hintText: 'e.g., JFK',
+            ),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _destCtrl,
-            decoration: const InputDecoration(labelText: 'To'),
+            decoration: const InputDecoration(
+              labelText: 'To',
+              hintText: 'e.g., LAX',
+            ),
           ),
           const SizedBox(height: 12),
           Row(
@@ -123,7 +176,9 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
                 child: InkWell(
                   onTap: () => _pickDate(isDeparture: true),
                   child: InputDecorator(
-                    decoration: const InputDecoration(labelText: 'Departure Date'),
+                    decoration: const InputDecoration(
+                      labelText: 'Departure Date',
+                    ),
                     child: Text(_depDate == null ? 'Select date' : DateFormat.yMMMd().format(_depDate!)),
                   ),
                 ),
@@ -134,7 +189,9 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
                   child: InkWell(
                     onTap: () => _pickDate(isDeparture: false),
                     child: InputDecorator(
-                      decoration: const InputDecoration(labelText: 'Return Date'),
+                      decoration: const InputDecoration(
+                        labelText: 'Return Date',
+                      ),
                       child: Text(_retDate == null ? 'Select date' : DateFormat.yMMMd().format(_retDate!)),
                     ),
                   ),
@@ -143,7 +200,7 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<int>(
-            initialValue: _passengers,
+            value: _passengers,
             decoration: const InputDecoration(labelText: 'Passengers'),
             items: List.generate(6, (i) => i + 1)
                 .map((n) => DropdownMenuItem(value: n, child: Text('$n Passenger${n > 1 ? 's' : ''}')))

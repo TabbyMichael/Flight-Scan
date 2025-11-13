@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/flight.dart';
 import '../providers/theme_provider.dart';
 import 'review_pay_screen.dart';
 
 class PassengerDetailsScreen extends StatefulWidget {
+  final Flight flight;
   final double totalCost;
   final Map<String, int> selections;
   const PassengerDetailsScreen({
     super.key,
+    required this.flight,
     required this.totalCost,
     required this.selections,
   });
@@ -26,11 +29,12 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
   void _next() {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
-
+    
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ReviewPayScreen(
+          flight: widget.flight,
           totalCost: widget.totalCost,
           selections: widget.selections,
           firstName: _firstName,
@@ -74,18 +78,21 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
                 decoration: const InputDecoration(labelText: 'First Name'),
                 validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                 onSaved: (v) => _firstName = v!,
+                onChanged: (_) => {},
               ),
               const SizedBox(height: 12),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Last Name'),
                 validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                 onSaved: (v) => _lastName = v!,
+                onChanged: (_) => {},
               ),
               const SizedBox(height: 12),
               TextFormField(
                 decoration: const InputDecoration(labelText: 'Passport Number'),
                 validator: (v) => v == null || v.isEmpty ? 'Required' : null,
                 onSaved: (v) => _passport = v!,
+                onChanged: (_) => {},
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -93,6 +100,7 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
                 keyboardType: TextInputType.emailAddress,
                 validator: (v) => v != null && v.contains('@') ? null : 'Enter valid email',
                 onSaved: (v) => _email = v!,
+                onChanged: (_) => {},
               ),
               const SizedBox(height: 24),
               ElevatedButton(
