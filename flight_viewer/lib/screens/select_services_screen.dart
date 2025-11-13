@@ -4,6 +4,7 @@ import '../models/flight.dart';
 import '../providers/extra_service_provider.dart';
 import '../providers/theme_provider.dart';
 import 'passenger_details_screen.dart';
+import '../widgets/custom_loader.dart';
 
 class SelectServicesScreen extends StatelessWidget {
   final Flight flight;
@@ -46,7 +47,12 @@ class _SelectServicesBody extends StatelessWidget {
         ],
       ),
       body: provider.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CustomLoader(
+                message: 'Loading services...',
+                useIOSStyle: true,
+              ),
+            )
           : provider.error != null
               ? Center(child: Text('Error: ${provider.error}'))
               : _ServiceList(flight: flight),

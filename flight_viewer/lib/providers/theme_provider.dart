@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/haptics_service.dart';
 
 class ThemeProvider with ChangeNotifier {
   static const String _themeKey = 'app_theme';
   
   ThemeMode _themeMode = ThemeMode.system;
+  final HapticsService _hapticsService = HapticsService();
 
   ThemeMode get themeMode => _themeMode;
 
@@ -57,5 +59,7 @@ class ThemeProvider with ChangeNotifier {
     } else {
       setThemeMode(ThemeMode.dark);
     }
+    // Trigger haptic feedback when theme is toggled
+    _hapticsService.lightImpact();
   }
 }

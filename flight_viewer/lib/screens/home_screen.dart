@@ -4,6 +4,7 @@ import '../providers/flight_provider.dart';
 import '../providers/theme_provider.dart';
 import 'flight_detail_screen.dart';
 import '../widgets/filter_bottom_sheet.dart';
+import '../widgets/custom_loader.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -53,7 +54,12 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Consumer<FlightProvider>(
         builder: (context, flightProvider, _) {
           if (flightProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CustomLoader(
+                message: 'Loading flights...',
+                useIOSStyle: true,
+              ),
+            );
           }
 
           if (flightProvider.error != null) {

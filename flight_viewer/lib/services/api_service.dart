@@ -4,11 +4,14 @@ import '../models/flight.dart';
 import '../models/airline.dart';
 import '../models/extra_service.dart';
 import '../models/booking.dart';
+import 'haptics_service.dart';
 
 class ApiService {
   static const String baseUrl = 'http://10.0.2.2:8000'; // For Android emulator
   // static const String baseUrl = 'http://localhost:8000'; // For web
   // static const String baseUrl = 'http://YOUR_COMPUTER_IP:8000'; // For physical device
+  
+  final HapticsService _hapticsService = HapticsService();
 
   Future<List<Flight>> fetchFlights() async {
     try {
@@ -19,9 +22,11 @@ class ApiService {
         final List<dynamic> flightsJson = data['flights'] ?? [];
         return flightsJson.map((json) => Flight.fromJson(json)).toList();
       } else {
+        _hapticsService.error();
         throw Exception('Failed to load flights: ${response.statusCode}');
       }
     } catch (e) {
+      _hapticsService.error();
       throw Exception('Failed to fetch flights: $e');
     }
   }
@@ -34,9 +39,11 @@ class ApiService {
         final List<dynamic> airlinesJson = json.decode(response.body);
         return airlinesJson.map((json) => Airline.fromJson(json)).toList();
       } else {
+        _hapticsService.error();
         throw Exception('Failed to load airlines: ${response.statusCode}');
       }
     } catch (e) {
+      _hapticsService.error();
       throw Exception('Failed to fetch airlines: $e');
     }
   }
@@ -68,9 +75,11 @@ class ApiService {
         final List<dynamic> flightsJson = data['flights'] ?? [];
         return flightsJson.map((json) => Flight.fromJson(json)).toList();
       } else {
+        _hapticsService.error();
         throw Exception('Failed to search flights: ${response.statusCode}');
       }
     } catch (e) {
+      _hapticsService.error();
       throw Exception('Failed to search flights: $e');
     }
   }
@@ -110,9 +119,11 @@ class ApiService {
         
         return services;
       } else {
+        _hapticsService.error();
         throw Exception('Failed to load services: ${response.statusCode}');
       }
     } catch (e) {
+      _hapticsService.error();
       throw Exception('Failed to fetch services: $e');
     }
   }
@@ -155,6 +166,7 @@ class ApiService {
     } catch (e) {
       // Handle any parsing errors gracefully
       print('Error parsing $categoryName services: $e');
+      _hapticsService.error();
     }
     
     return services;
@@ -208,11 +220,14 @@ class ApiService {
       
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
+        _hapticsService.success();
         return Booking.fromJson(responseData);
       } else {
+        _hapticsService.error();
         throw Exception('Failed to create booking: ${response.statusCode}');
       }
     } catch (e) {
+      _hapticsService.error();
       throw Exception('Failed to create booking: $e');
     }
   }
@@ -226,9 +241,11 @@ class ApiService {
         final List<dynamic> jsonList = json.decode(response.body);
         return jsonList.map((json) => Booking.fromJson(json)).toList();
       } else {
+        _hapticsService.error();
         throw Exception('Failed to load bookings: ${response.statusCode}');
       }
     } catch (e) {
+      _hapticsService.error();
       throw Exception('Failed to fetch bookings: $e');
     }
   }

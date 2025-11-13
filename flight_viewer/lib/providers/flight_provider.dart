@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import '../models/flight.dart';
 import '../services/api_service.dart';
+import '../services/haptics_service.dart';
 
 class FlightProvider with ChangeNotifier {
   final ApiService _apiService = ApiService();
+  final HapticsService _hapticsService = HapticsService();
   List<Flight> _flights = [];
   List<Flight> _allFlights = [];
   bool _isLoading = false;
@@ -22,8 +24,10 @@ class FlightProvider with ChangeNotifier {
       _allFlights = await _apiService.fetchFlights();
       _flights = List.from(_allFlights);
       _error = null;
+      _hapticsService.success();
     } catch (e) {
       _error = e.toString();
+      _hapticsService.error();
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -70,8 +74,10 @@ class FlightProvider with ChangeNotifier {
         airlineCodes: airlineCodes,
       );
       _error = null;
+      _hapticsService.success();
     } catch (e) {
       _error = e.toString();
+      _hapticsService.error();
     } finally {
       _isLoading = false;
       notifyListeners();
