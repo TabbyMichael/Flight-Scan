@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import '../models/booking.dart';
 import '../services/api_service.dart';
+import '../services/haptics_service.dart';
 
 class BookingProvider with ChangeNotifier {
   final ApiService _api = ApiService();
+  final HapticsService _hapticsService = HapticsService();
   List<Booking> _bookings = [];
   bool _loading = false;
   String? _error;
@@ -18,8 +20,10 @@ class BookingProvider with ChangeNotifier {
     notifyListeners();
     try {
       _bookings = await _api.fetchUserBookings(email);
+      _hapticsService.success();
     } catch (e) {
       _error = e.toString();
+      _hapticsService.error();
     } finally {
       _loading = false;
       notifyListeners();
@@ -50,9 +54,11 @@ class BookingProvider with ChangeNotifier {
       _bookings.add(booking);
       notifyListeners();
       
+      _hapticsService.success();
       return booking;
     } catch (e) {
       _error = e.toString();
+      _hapticsService.error();
       rethrow;
     }
   }

@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../models/booking.dart';
 import '../providers/booking_provider.dart';
 import '../providers/theme_provider.dart';
+import '../widgets/custom_loader.dart';
 
 class MyBookingsScreen extends StatefulWidget {
   const MyBookingsScreen({super.key});
@@ -28,9 +29,8 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
     final bookingProvider = context.read<BookingProvider>();
     try {
       await bookingProvider.fetchBookings(_emailController.text);
-      // Removed HapticsService call
     } catch (e) {
-      // Removed HapticsService call
+      // Error handling is done in the provider
     }
   }
 
@@ -59,7 +59,12 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
       body: Consumer<BookingProvider>(
         builder: (context, bookingProvider, child) {
           if (bookingProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CustomLoader(
+                message: 'Loading bookings...',
+                useIOSStyle: true,
+              ),
+            );
           }
 
           if (bookingProvider.error != null) {

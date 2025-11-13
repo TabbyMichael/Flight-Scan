@@ -1,9 +1,11 @@
 import 'package:flutter/foundation.dart';
 import '../models/extra_service.dart';
 import '../services/api_service.dart';
+import '../services/haptics_service.dart';
 
 class ExtraServiceProvider with ChangeNotifier {
   final ApiService _api = ApiService();
+  final HapticsService _hapticsService = HapticsService();
   List<ExtraService> _services = [];
   final Map<String, int> _selectedQty = {};
   bool _loading = false;
@@ -45,6 +47,7 @@ class ExtraServiceProvider with ChangeNotifier {
       }
     } catch (e) {
       _error = e.toString();
+      _hapticsService.error();
     } finally {
       _loading = false;
       notifyListeners();
@@ -54,6 +57,8 @@ class ExtraServiceProvider with ChangeNotifier {
   void setQuantity(String id, int qty) {
     _selectedQty[id] = qty;
     notifyListeners();
+    // Trigger haptic feedback when quantity changes
+    _hapticsService.lightImpact();
   }
 
   Map<String, int> get selections => Map.unmodifiable(_selectedQty);

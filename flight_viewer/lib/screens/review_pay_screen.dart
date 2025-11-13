@@ -4,6 +4,8 @@ import '../models/flight.dart';
 import '../providers/extra_service_provider.dart';
 import '../providers/booking_provider.dart';
 import '../providers/theme_provider.dart';
+import '../widgets/custom_loader.dart';
+import '../services/haptics_service.dart';
 
 class ReviewPayScreen extends StatelessWidget {
   final Flight flight;
@@ -53,8 +55,9 @@ class _ReviewPayBody extends StatelessWidget {
   final String lastName;
   final String passport;
   final String email;
+  late final HapticsService _hapticsService = HapticsService();
 
-  const _ReviewPayBody({
+  _ReviewPayBody({
     required this.flight,
     required this.totalCost,
     required this.selections,
@@ -93,7 +96,12 @@ class _ReviewPayBody extends StatelessWidget {
         ],
       ),
       body: extraProvider.isLoading || bookingProvider.isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CustomLoader(
+                message: 'Processing...',
+                useIOSStyle: true,
+              ),
+            )
           : (extraProvider.error != null || bookingProvider.error != null)
               ? Center(child: Text('Error: ${extraProvider.error ?? bookingProvider.error}'))
               : Padding(
@@ -243,7 +251,10 @@ class _ReviewPayBody extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: bookingProvider.isLoading ? null : () => _confirmBooking(context),
                           child: bookingProvider.isLoading
-                              ? const CircularProgressIndicator()
+                              ? const CustomLoader(
+                                  message: 'Confirming booking...',
+                                  useIOSStyle: true,
+                                )
                               : const Text('Pay & Confirm'),
                         ),
                       ),
@@ -326,6 +337,9 @@ class _ReviewPayBody extends StatelessWidget {
     final bookingProvider = context.read<BookingProvider>();
     
     try {
+      // Trigger haptic feedback when booking begins
+      _hapticsService.selection();
+      
       await bookingProvider.createBooking(
         flightId: flight.id, // This is the correct flight ID
         firstName: firstName,
@@ -335,6 +349,9 @@ class _ReviewPayBody extends StatelessWidget {
         extras: selections,
         totalCost: totalCost,
       );
+      
+      // Trigger success haptic feedback
+      _hapticsService.success();
       
       // Show success dialog
       showDialog(
@@ -353,6 +370,9 @@ class _ReviewPayBody extends StatelessWidget {
         ),
       );
     } catch (e) {
+      // Trigger error haptic feedback
+      _hapticsService.error();
+      
       // Show error dialog
       showDialog(
         context: context,

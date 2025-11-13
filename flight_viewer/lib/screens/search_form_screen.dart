@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../providers/flight_provider.dart';
 import '../providers/theme_provider.dart';
 import 'home_screen.dart';
+import 'loading_screen.dart';
+import '../services/haptics_service.dart';
 
 class SearchFormScreen extends StatefulWidget {
   const SearchFormScreen({super.key});
@@ -17,6 +19,7 @@ enum TripType { roundTrip, oneWay }
 class _SearchFormScreenState extends State<SearchFormScreen> {
   final _origCtrl = TextEditingController();
   final _destCtrl = TextEditingController();
+  final HapticsService _hapticsService = HapticsService();
   DateTime? _depDate;
   DateTime? _retDate;
   int _passengers = 1;
@@ -48,18 +51,16 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
   void _search() async {
     final provider = context.read<FlightProvider>();
     
-    // Show loading indicator
-    if (mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        },
-      );
-    }
+    // Trigger haptic feedback when search begins
+    _hapticsService.selection();
+    
+    // Navigate to loading screen instead of showing dialog
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LoadingScreen(message: 'Searching flights...'),
+      ),
+    );
     
     try {
       // Perform search with form data
@@ -70,15 +71,24 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
       );
       
       if (mounted) {
-        Navigator.pop(context); // Dismiss loading dialog
-        Navigator.push(
+        // Trigger success haptic feedback
+        _hapticsService.success();
+        
+        // Navigate to home screen
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
         );
       }
     } catch (e) {
       if (mounted) {
-        Navigator.pop(context); // Dismiss loading dialog
+        // Trigger error haptic feedback
+        _hapticsService.error();
+        
+        // Go back to the search form
+        Navigator.pop(context);
+        
         // Show error dialog
         showDialog(
           context: context,

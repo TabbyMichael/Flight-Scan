@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/theme_provider.dart';
+import '../../widgets/custom_loader.dart';
+import '../../services/haptics_service.dart';
 
-class LoadingScreen extends StatelessWidget {
+class LoadingScreen extends StatefulWidget {
   final String message;
 
   const LoadingScreen({super.key, this.message = 'Loading...'});
+
+  @override
+  State<LoadingScreen> createState() => _LoadingScreenState();
+}
+
+class _LoadingScreenState extends State<LoadingScreen> {
+  final HapticsService _hapticsService = HapticsService();
+
+  @override
+  void initState() {
+    super.initState();
+    // Trigger a light haptic feedback when loading starts
+    _hapticsService.lightImpact();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,16 +45,9 @@ class LoadingScreen extends StatelessWidget {
         ],
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-          ],
+        child: CustomLoader(
+          message: widget.message,
+          useIOSStyle: true,
         ),
       ),
     );
