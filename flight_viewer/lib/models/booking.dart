@@ -21,17 +21,35 @@ class Booking {
     required this.createdAt,
   });
 
-  factory Booking.fromJson(Map<String, dynamic> json) => Booking(
-        id: json['id'],
-        flightId: json['flightId'],
-        extras: Map<String, int>.from(json['extras']),
-        firstName: json['firstName'],
-        lastName: json['lastName'],
-        passport: json['passport'],
-        email: json['email'],
-        totalCost: (json['totalCost'] as num).toDouble(),
-        createdAt: DateTime.parse(json['createdAt']),
+  factory Booking.fromJson(Map<String, dynamic> json) {
+    try {
+      return Booking(
+        id: json['id']?.toString() ?? '',
+        flightId: json['flight_id']?.toString() ?? json['flightId']?.toString() ?? '',
+        extras: json['extras'] != null 
+            ? Map<String, int>.from(
+                Map<dynamic, dynamic>.from(json['extras']).map(
+                  (key, value) => MapEntry(key.toString(), value is int ? value : int.tryParse(value.toString()) ?? 0),
+                ),
+              )
+            : <String, int>{},
+        firstName: json['first_name']?.toString() ?? json['firstName']?.toString() ?? '',
+        lastName: json['last_name']?.toString() ?? json['lastName']?.toString() ?? '',
+        passport: json['passport']?.toString() ?? '',
+        email: json['email']?.toString() ?? '',
+        totalCost: (json['total_price'] ?? json['totalCost'])?.toDouble() ?? 0.0,
+        createdAt: json['created_at'] != null 
+            ? DateTime.tryParse(json['created_at'].toString()) ?? DateTime.now()
+            : json['createdAt'] != null
+                ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
+                : DateTime.now(),
       );
+    } catch (e) {
+      print('Error parsing booking: $e');
+      print('JSON data: $json');
+      rethrow;
+    }
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,
