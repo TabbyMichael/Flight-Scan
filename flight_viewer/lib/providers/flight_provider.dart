@@ -10,6 +10,16 @@ class FlightProvider with ChangeNotifier {
   List<Flight> _allFlights = [];
   bool _isLoading = false;
   String? _error;
+  
+  // Filter state
+  double? _currentMaxPrice;
+  int? _currentMaxStops;
+  Set<String> _selectedAirlines = {};
+  
+  // Getters for filter state
+  double? get currentMaxPrice => _currentMaxPrice;
+  int? get currentMaxStops => _currentMaxStops;
+  Set<String> get selectedAirlines => _selectedAirlines;
 
   List<Flight> get flights => _flights;
   bool get isLoading => _isLoading;
@@ -40,6 +50,11 @@ class FlightProvider with ChangeNotifier {
     int? maxStops,
     Set<String>? airlineCodes,
   }) {
+    // Update filter state
+    _currentMaxPrice = maxPrice;
+    _currentMaxStops = maxStops;
+    _selectedAirlines = airlineCodes ?? {};
+    
     _flights = _allFlights.where((f) {
       if (maxPrice != null && f.price > maxPrice) return false;
       if (maxStops != null && f.stops > maxStops) return false;
@@ -48,6 +63,8 @@ class FlightProvider with ChangeNotifier {
       }
       return true;
     }).toList();
+    
+    _hapticsService.lightImpact();
     notifyListeners();
   }
 
