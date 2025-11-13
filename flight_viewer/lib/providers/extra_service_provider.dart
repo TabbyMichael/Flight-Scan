@@ -24,6 +24,15 @@ class ExtraServiceProvider with ChangeNotifier {
 
   int quantityFor(String id) => _selectedQty[id] ?? 0;
 
+  // Add this method to get a service by its ID
+  ExtraService? getServiceById(String id) {
+    try {
+      return _services.firstWhere((service) => service.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> fetchServices() async {
     _loading = true;
     _error = null;

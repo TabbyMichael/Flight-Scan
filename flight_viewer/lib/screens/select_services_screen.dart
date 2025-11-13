@@ -13,13 +13,14 @@ class SelectServicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => ExtraServiceProvider()..fetchServices(),
-      child: const _SelectServicesBody(),
+      child: _SelectServicesBody(flight: flight),
     );
   }
 }
 
 class _SelectServicesBody extends StatelessWidget {
-  const _SelectServicesBody();
+  final Flight flight;
+  const _SelectServicesBody({required this.flight});
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +49,7 @@ class _SelectServicesBody extends StatelessWidget {
           ? const Center(child: CircularProgressIndicator())
           : provider.error != null
               ? Center(child: Text('Error: ${provider.error}'))
-              : _ServiceList(),
+              : _ServiceList(flight: flight),
       bottomNavigationBar: provider.isLoading
           ? null
           : Padding(
@@ -59,6 +60,7 @@ class _SelectServicesBody extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => PassengerDetailsScreen(
+                        flight: flight,
                         totalCost: provider.totalCost,
                         selections: provider.selections,
                       ),
@@ -73,6 +75,9 @@ class _SelectServicesBody extends StatelessWidget {
 }
 
 class _ServiceList extends StatelessWidget {
+  final Flight flight;
+  const _ServiceList({required this.flight});
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ExtraServiceProvider>();
@@ -99,14 +104,18 @@ class _ServiceList extends StatelessWidget {
                       children: [
                         IconButton(
                           onPressed: qty > svc.minQuantity
-                              ? () => provider.setQuantity(svc.id, qty - 1)
+                              ? () {
+                                  provider.setQuantity(svc.id, qty - 1);
+                                }
                               : null,
                           icon: const Icon(Icons.remove_circle_outline),
                         ),
                         Text('$qty'),
                         IconButton(
                           onPressed: qty < svc.maxQuantity
-                              ? () => provider.setQuantity(svc.id, qty + 1)
+                              ? () {
+                                  provider.setQuantity(svc.id, qty + 1);
+                                }
                               : null,
                           icon: const Icon(Icons.add_circle_outline),
                         ),

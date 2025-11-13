@@ -47,8 +47,11 @@ class FlightProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Still available if we later want server-side filtering
+  // Server-side search with all parameters
   Future<void> searchFlights({
+    String? origin,
+    String? destination,
+    DateTime? departureDate,
     double? maxPrice,
     int? maxStops,
     List<String>? airlineCodes,
@@ -59,6 +62,9 @@ class FlightProvider with ChangeNotifier {
 
     try {
       _flights = await _apiService.searchFlights(
+        origin: origin,
+        destination: destination,
+        departureDate: departureDate,
         maxPrice: maxPrice,
         maxStops: maxStops,
         airlineCodes: airlineCodes,

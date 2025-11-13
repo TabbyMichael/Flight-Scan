@@ -209,30 +209,32 @@ class FlightDetailScreen extends StatelessWidget {
               ),
             ),
             const Divider(),
-            ...flight.segments.map((segment) => _buildSegmentItem(segment, context)),
+            ...flight.segments.map((segment) => _buildSegmentItem(segment)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSegmentItem(dynamic segment, BuildContext context) {
-    // This is a simplified implementation. In a real app, you would have a proper Segment model.
+  Widget _buildSegmentItem(Segment segment) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Icon(Icons.flight_takeoff, size: 20, color: Theme.of(context).colorScheme.primary),
+          const Icon(Icons.flight_takeoff, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '${segment['departure']} → ${segment['arrival']}',
-              style: Theme.of(context).textTheme.bodyMedium,
+              '${segment.departureAirport} → ${segment.arrivalAirport}',
+              style: const TextStyle(fontSize: 16),
             ),
           ),
           Text(
-            '${segment['duration']} min',
-            style: Theme.of(context).textTheme.bodySmall,
+            '${segment.duration} min',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
           ),
         ],
       ),
