@@ -41,35 +41,26 @@ class MainTabScreen extends StatelessWidget {
               ),
             ),
           ],
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(46),
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: TabBar(
-                indicator: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Theme.of(context).primaryColor.withOpacity(0.3),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                labelPadding: const EdgeInsets.symmetric(vertical: 12),
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.grey.shade600,
-                labelStyle: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-                tabs: const [
-                  Tab(text: 'Search Flights'),
-                  Tab(text: 'My Bookings'),
-                ],
-              ),
+          bottom: TabBar(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            labelColor: Theme.of(context).colorScheme.primary,
+            unselectedLabelColor: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.5) ?? Colors.grey,
+            indicatorColor: Theme.of(context).colorScheme.primary,
+            indicatorWeight: 3.0,
+            indicatorSize: TabBarIndicatorSize.tab,
+            labelStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
             ),
+            unselectedLabelStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+            tabs: const [
+              Tab(text: 'Search Flights'),
+              Tab(text: 'My Bookings'),
+            ],
           ),
         ),
         body: TabBarView(

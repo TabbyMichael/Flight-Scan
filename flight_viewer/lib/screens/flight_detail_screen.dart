@@ -55,24 +55,29 @@ class FlightDetailScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(12),
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Theme.of(context).dividerColor.withOpacity(0.1),
+                          width: 1,
+                        ),
+                      ),
                     ),
                     child: TabBar(
-                      labelColor: Theme.of(context).colorScheme.onSurface,
-                      unselectedLabelColor: Theme.of(context).hintColor,
-                      indicator: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      labelColor: Theme.of(context).colorScheme.primary,
+                      unselectedLabelColor: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.5) ?? Colors.grey,
+                      indicatorColor: Theme.of(context).colorScheme.primary,
+                      indicatorWeight: 3.0,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      labelStyle: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                      unselectedLabelStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
                       tabs: const [
                         Tab(text: 'Details'),
