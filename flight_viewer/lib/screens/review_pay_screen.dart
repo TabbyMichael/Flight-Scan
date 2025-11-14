@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/flight.dart';
+import '../models/booking.dart';
 import '../providers/extra_service_provider.dart';
 import '../providers/booking_provider.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/custom_loader.dart';
 import '../services/haptics_service.dart';
-import 'main_tab_screen.dart';
+import 'receipt_screen.dart';
+import '../models/receipt.dart';
 
 class ReviewPayScreen extends StatelessWidget {
   final Flight flight;
@@ -341,8 +343,8 @@ class _ReviewPayBody extends StatelessWidget {
       // Trigger haptic feedback when booking begins
       _hapticsService.selection();
       
-      await bookingProvider.createBooking(
-        flightId: flight.id, // This is the correct flight ID
+      final booking = await bookingProvider.createBooking(
+        flightId: flight.id,
         firstName: firstName,
         lastName: lastName,
         passport: passport,
@@ -351,15 +353,32 @@ class _ReviewPayBody extends StatelessWidget {
         totalCost: totalCost,
       );
       
-      // Trigger success haptic feedback
       _hapticsService.success();
       
-      // Navigate to MainTabScreen after successful booking
       if (context.mounted) {
+        // Create receipt from booking response
+        final receipt = Receipt(
+          bookingId: booking.id,
+          pnr: 'PNR-${booking.id.substring(0, 8).toUpperCase()}', // Generate a simple PNR
+          status: 'confirmed',
+          bookingDate: booking.createdAt,
+          flightNumber: '${flight.airlineCode} ${flight.flightNumber}',
+          departure: flight.departureAirport,
+          arrival: flight.arrivalAirport,
+          departureTime: flight.departureTime,
+          passengerName: '$firstName $lastName',
+          email: email,
+          totalAmount: booking.totalCost,
+          extras: booking.extras,
+        );
+
+        // Navigate to receipt screen
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const MainTabScreen()),
-          (route) => false, // Remove all previous routes
+          MaterialPageRoute(
+            builder: (_) => ReceiptScreen(receipt: receipt),
+          ),
+          (route) => false,
         );
       }
     } catch (e) {
