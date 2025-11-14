@@ -1,3 +1,4 @@
+import '../utils/navigation_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -54,14 +55,6 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
     // Trigger haptic feedback when search begins
     _hapticsService.selection();
     
-    // Navigate to loading screen instead of showing dialog
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const LoadingScreen(message: 'Searching flights...'),
-      ),
-    );
-    
     try {
       // Perform search with form data
       await provider.searchFlights(
@@ -74,11 +67,11 @@ class _SearchFormScreenState extends State<SearchFormScreen> {
         // Trigger success haptic feedback
         _hapticsService.success();
         
-        // Navigate to home screen
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-          (route) => false,
+        // Navigate to home screen with loading
+        await NavigationUtils.navigateAndReplaceWithDelay(
+          context: context,
+          page: const HomeScreen(),
+          message: 'Loading search results...',
         );
       }
     } catch (e) {

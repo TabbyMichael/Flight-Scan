@@ -7,8 +7,8 @@ import '../models/booking.dart';
 import 'haptics_service.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://10.0.2.2:8000'; // For Android emulator
-  // static const String baseUrl = 'http://localhost:8000'; // For web
+  static const String baseUrl = 'http://127.0.0.1:8000'; // For iOS simulator and local development
+  // static const String baseUrl = 'http://10.0.2.2:8000'; // For Android emulator
   // static const String baseUrl = 'http://YOUR_COMPUTER_IP:8000'; // For physical device
   
   final HapticsService _hapticsService = HapticsService();

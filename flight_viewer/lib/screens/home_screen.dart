@@ -3,10 +3,11 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/flight_provider.dart';
 import '../providers/theme_provider.dart';
+import '../utils/navigation_utils.dart';
 import 'flight_detail_screen.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/custom_loader.dart';
-import '../models/flight.dart';
+import '../models/flight.dart' as flight_model;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -108,7 +109,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildFlightCard(BuildContext context, Flight flight) {
+  void _openFlightDetails(BuildContext context, flight_model.Flight flight) {
+    NavigationUtils.navigateWithDelay(
+      context: context,
+      page: FlightDetailScreen(flight: flight),
+      message: 'Loading flight details...',
+    );
+  }
+
+  Widget _buildFlightCard(BuildContext context, flight_model.Flight flight) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -121,14 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => FlightDetailScreen(flight: flight),
-            ),
-          );
-        },
+        onTap: () => _openFlightDetails(context, flight),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -285,11 +287,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FlightDetailScreen(flight: flight),
-                      ),
+                    NavigationUtils.navigateWithDelay(
+                      context: context,
+                      page: FlightDetailScreen(flight: flight),
+                      message: 'Loading flight details...',
                     );
                   },
                   style: ElevatedButton.styleFrom(

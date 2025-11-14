@@ -7,6 +7,7 @@ import '../providers/theme_provider.dart';
 import 'select_services_screen.dart';
 import '../models/flight.dart';
 import '../widgets/custom_loader.dart';
+import '../utils/navigation_utils.dart';
 
 class FlightDetailScreen extends StatelessWidget {
   final Flight flight;
@@ -669,11 +670,10 @@ class FlightDetailScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 16),
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => SelectServicesScreen(flight: flight),
-                      ),
+                    NavigationUtils.navigateWithDelay(
+                      context: context,
+                      page: SelectServicesScreen(flight: flight),
+                      message: 'Preparing booking...',
                     );
                   },
                   style: ElevatedButton.styleFrom(
