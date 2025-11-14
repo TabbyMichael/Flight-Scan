@@ -5,15 +5,20 @@ This is the backend API for the SkyScan Flight Search and Booking Management App
 ## Setup
 
 1. Create a virtual environment (recommended):
+
+   # On Windows: venv\Scripts\activate
+
    ```bash
    python3 -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   source venv/bin/activate
+   pip install -r requirements.txt  
+
+      # On Windows: venv\Scripts\activate
+
+   python3.11 -m venv venv
+   source venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt  # On Mac: venv\Scripts\activate
    ```
 
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
 
 ## Running the API
 

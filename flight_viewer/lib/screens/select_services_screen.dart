@@ -7,6 +7,7 @@ import '../providers/extra_service_provider.dart';
 import '../providers/theme_provider.dart';
 import 'passenger_details_screen.dart';
 import '../widgets/custom_loader.dart';
+import '../utils/navigation_utils.dart';
 
 class SelectServicesScreen extends StatelessWidget {
   final Flight flight;
@@ -105,15 +106,14 @@ class _SelectServicesBody extends StatelessWidget {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PassengerDetailsScreen(
-                                flight: flight,
-                                totalCost: provider.totalCost,
-                                selections: provider.selections,
-                              ),
+                          NavigationUtils.navigateWithDelay(
+                            context: context,
+                            page: PassengerDetailsScreen(
+                              flight: flight,
+                              totalCost: provider.totalCost,
+                              selections: provider.selections,
                             ),
+                            message: 'Preparing passenger details...',
                           );
                         },
                         style: ElevatedButton.styleFrom(

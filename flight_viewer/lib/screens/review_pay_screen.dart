@@ -6,6 +6,7 @@ import '../providers/booking_provider.dart';
 import '../providers/theme_provider.dart';
 import '../widgets/custom_loader.dart';
 import '../services/haptics_service.dart';
+import 'main_tab_screen.dart';
 
 class ReviewPayScreen extends StatelessWidget {
   final Flight flight;
@@ -353,22 +354,14 @@ class _ReviewPayBody extends StatelessWidget {
       // Trigger success haptic feedback
       _hapticsService.success();
       
-      // Show success dialog
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Success'),
-          content: const Text('Booking confirmed! Your booking has been saved.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.popUntil(context, (r) => r.isFirst);
-              },
-              child: const Text('OK'),
-            )
-          ],
-        ),
-      );
+      // Navigate to MainTabScreen after successful booking
+      if (context.mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const MainTabScreen()),
+          (route) => false, // Remove all previous routes
+        );
+      }
     } catch (e) {
       // Trigger error haptic feedback
       _hapticsService.error();

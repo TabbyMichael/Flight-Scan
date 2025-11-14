@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../models/flight.dart';
 import '../providers/theme_provider.dart';
 import 'review_pay_screen.dart';
+import '../utils/navigation_utils.dart';
+import '../widgets/custom_loader.dart';
 
 class PassengerDetailsScreen extends StatefulWidget {
   final Flight flight;
@@ -30,19 +32,18 @@ class _PassengerDetailsScreenState extends State<PassengerDetailsScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
     
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ReviewPayScreen(
-          flight: widget.flight,
-          totalCost: widget.totalCost,
-          selections: widget.selections,
-          firstName: _firstName,
-          lastName: _lastName,
-          passport: _passport,
-          email: _email,
-        ),
+    NavigationUtils.navigateWithDelay(
+      context: context,
+      page: ReviewPayScreen(
+        flight: widget.flight,
+        totalCost: widget.totalCost,
+        selections: widget.selections,
+        firstName: _firstName,
+        lastName: _lastName,
+        passport: _passport,
+        email: _email,
       ),
+      message: 'Preparing payment...',
     );
   }
 
